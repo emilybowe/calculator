@@ -173,16 +173,16 @@
             .container {
                 padding: 20px;
             }
-            
+
             .form-group {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             label {
                 margin-bottom: 5px;
             }
-            
+
             input[type="number"], input[type="date"], select {
                 width: 100%;
             }
@@ -194,384 +194,423 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Office Attendance Calculator</h1>
-        
-        <div class="form-section">
-            <h3>Location & Period</h3>
-            <div class="form-group">
-                <label for="officeLocation">Office Location:</label>
-                <select id="officeLocation">
-                    <option value="Dublin">Dublin</option>
-                    <option value="London">London</option>
-                    <option value="NewYork">New York</option>
-                    <option value="Singapore">Singapore</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="SaoPaulo">São Paulo</option>
-                    <option value="AbuDhabi">Abu Dhabi</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="periodSelect">Period:</label>
-                <select id="periodSelect">
-                    <!-- Options will be populated by JavaScript -->
-                </select>
-            </div>
-            <div class="period-dates" id="periodDates">
-                <!-- Period dates will be displayed here -->
-            </div>
-            <div class="form-group">
-                <label for="workingDays">Working days in period:</label>
-                <input type="number" id="workingDays" value="21" min="1" readonly style="background: #f5f5f5;">
-            </div>
-            <div class="form-group">
-                <label for="minOffice">Minimum days in office:</label>
-                <input type="number" id="minOffice" value="10" min="0">
-            </div>
-            <div class="form-group">
-                <label for="businessTravel">Business travel (days):</label>
-                <input type="number" id="businessTravel" value="0" min="0">
-            </div>
-        </div>
+<div class="container">
+    <h1>Office Attendance Calculator</h1>
 
-        <div class="form-section">
-            <h3>Absences</h3>
-            <div class="form-group">
-                <div style="display: flex; align-items: center; flex: 1;">
-                    <label for="publicHolidays" style="margin-right: 10px;">Public Holidays:</label>
-                    <span id="holidaysList" class="holiday-list" style="margin-left: 0; margin-right: 10px;"></span>
-                </div>
-                <input type="number" id="publicHolidays" value="0" min="0" readonly style="background: #f5f5f5;">
-            </div>
-            <div class="form-group">
-                <label for="annualLeave">Annual Leave:</label>
-                <input type="number" id="annualLeave" value="0" min="0">
-            </div>
-            <div class="form-group">
-                <label for="sickness">Sickness:</label>
-                <input type="number" id="sickness" value="0" min="0">
-            </div>
-            <div class="form-group">
-                <label for="otherAbsence">Other absences (e.g., rail strike):</label>
-                <input type="number" id="otherAbsence" value="0" min="0">
-            </div>
+    <div class="form-section">
+        <h3>Location & Period</h3>
+        <div class="form-group">
+            <label for="officeLocation">Office Location:</label>
+            <select id="officeLocation">
+                <option value="Dublin">Dublin</option>
+                <option value="London">London</option>
+                <option value="NewYork">New York</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="SaoPaulo">São Paulo</option>
+                <option value="AbuDhabi">Abu Dhabi</option>
+            </select>
         </div>
-
-        <div id="result" class="result show">
-            <h3>Adjusted Target for Office Attendance</h3>
-            <div class="result-details">
-                <div class="result-row">
-                    <span>Total absence:</span>
-                    <span id="totalAbsence">-</span>
-                </div>
-                <div class="result-row">
-                    <span>Absence percentage:</span>
-                    <span id="absencePercent">-</span>
-                </div>
-                <div class="result-row">
-                    <span>Minimum days adjusted:</span>
-                    <span id="adjustedMin">-</span>
-                </div>
-                <div class="result-row">
-                    <span>Minus business travel:</span>
-                    <span id="minusTravel">-</span>
-                </div>
-            </div>
-            <div class="final-answer" id="finalAnswer">0 days</div>
+        <div class="form-group">
+            <label for="periodSelect">Period:</label>
+            <select id="periodSelect">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+        <div class="period-dates" id="periodDates">
+            <!-- Period dates will be displayed here -->
+        </div>
+        <div class="form-group">
+            <label for="workingDays">Working days in period:</label>
+            <input type="number" id="workingDays" value="21" min="1" readonly style="background: #f5f5f5;">
+        </div>
+        <div class="form-group">
+            <label for="minOffice">Minimum days in office:</label>
+            <input type="number" id="minOffice" value="10" min="0">
+        </div>
+        <div class="form-group">
+            <label for="businessTravel">Business travel (days):</label>
+            <input type="number" id="businessTravel" value="0" min="0">
         </div>
     </div>
 
-    <script>
-        // Public holidays database for different locations
-        const publicHolidays = {
-            AbuDhabi: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "Eid al-Fitr", date: "2025-03-30", type: "fixed" },
-                { name: "Eid al-Fitr", date: "2025-03-31", type: "fixed" },
-                { name: "Eid al-Fitr", date: "2025-04-01", type: "fixed" },
-                { name: "Arafat Day", date: "2025-06-06", type: "fixed" },
-                { name: "Eid al-Adha", date: "2025-06-07", type: "fixed" },
-                { name: "Eid al-Adha", date: "2025-06-08", type: "fixed" },
-                { name: "Eid al-Adha", date: "2025-06-09", type: "fixed" },
-                { name: "Islamic New Year", date: "2025-06-26", type: "fixed" },
-                { name: "Prophet Muhammad's Birthday", date: "2025-09-05", type: "fixed" },
-                { name: "Commemoration Day", date: "2025-12-01", type: "fixed" },
-                { name: "UAE National Day", date: "2025-12-02", type: "fixed" },
-                { name: "UAE National Day", date: "2025-12-03", type: "fixed" }
-            ],
-            Dublin: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "St. Patrick's Day", date: "2025-03-17", type: "fixed" },
-                { name: "Easter Monday", date: "2025-04-21", type: "easter" },
-                { name: "May Bank Holiday", date: "2025-05-05", type: "fixed" },
-                { name: "June Bank Holiday", date: "2025-06-02", type: "fixed" },
-                { name: "August Bank Holiday", date: "2025-08-04", type: "fixed" },
-                { name: "October Bank Holiday", date: "2025-10-27", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" },
-                { name: "St. Stephen's Day", date: "2025-12-26", type: "fixed" }
-            ],
-            London: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "Good Friday", date: "2025-04-18", type: "easter" },
-                { name: "Easter Monday", date: "2025-04-21", type: "easter" },
-                { name: "Early May Bank Holiday", date: "2025-05-05", type: "fixed" },
-                { name: "Spring Bank Holiday", date: "2025-05-26", type: "fixed" },
-                { name: "Summer Bank Holiday", date: "2025-08-25", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" },
-                { name: "Boxing Day", date: "2025-12-26", type: "fixed" }
-            ],
-            Mumbai: [
-                { name: "Republic Day", date: "2025-01-26", type: "fixed" },
-                { name: "Maha Shivratri", date: "2025-02-26", type: "fixed" },
-                { name: "Holi", date: "2025-03-14", type: "fixed" },
-                { name: "Ram Navami", date: "2025-04-06", type: "fixed" },
-                { name: "Good Friday", date: "2025-04-18", type: "easter" },
-                { name: "Buddha Purnima", date: "2025-05-12", type: "fixed" },
-                { name: "Eid al-Fitr", date: "2025-03-31", type: "fixed" },
-                { name: "Eid al-Adha", date: "2025-06-07", type: "fixed" },
-                { name: "Independence Day", date: "2025-08-15", type: "fixed" },
-                { name: "Ganesh Chaturthi", date: "2025-08-27", type: "fixed" },
-                { name: "Gandhi Jayanti", date: "2025-10-02", type: "fixed" },
-                { name: "Dussehra", date: "2025-10-02", type: "fixed" },
-                { name: "Diwali", date: "2025-10-20", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
-            ],
-            NewYork: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "Martin Luther King Jr. Day", date: "2025-01-20", type: "fixed" },
-                { name: "Presidents' Day", date: "2025-02-17", type: "fixed" },
-                { name: "Memorial Day", date: "2025-05-26", type: "fixed" },
-                { name: "Juneteenth", date: "2025-06-19", type: "fixed" },
-                { name: "Independence Day", date: "2025-07-04", type: "fixed" },
-                { name: "Labor Day", date: "2025-09-01", type: "fixed" },
-                { name: "Columbus Day", date: "2025-10-13", type: "fixed" },
-                { name: "Veterans Day", date: "2025-11-11", type: "fixed" },
-                { name: "Thanksgiving", date: "2025-11-27", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
-            ],
-            SaoPaulo: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "Carnival Monday", date: "2025-03-03", type: "fixed" },
-                { name: "Carnival Tuesday", date: "2025-03-04", type: "fixed" },
-                { name: "Good Friday", date: "2025-04-18", type: "easter" },
-                { name: "Tiradentes", date: "2025-04-21", type: "fixed" },
-                { name: "Labour Day", date: "2025-05-01", type: "fixed" },
-                { name: "Corpus Christi", date: "2025-06-19", type: "fixed" },
-                { name: "Independence Day", date: "2025-09-07", type: "fixed" },
-                { name: "Our Lady of Aparecida", date: "2025-10-12", type: "fixed" },
-                { name: "All Souls' Day", date: "2025-11-02", type: "fixed" },
-                { name: "Proclamation of the Republic", date: "2025-11-15", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
-            ],
-            Singapore: [
-                { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
-                { name: "Chinese New Year", date: "2025-01-29", type: "fixed" },
-                { name: "Chinese New Year", date: "2025-01-30", type: "fixed" },
-                { name: "Good Friday", date: "2025-04-18", type: "easter" },
-                { name: "Labour Day", date: "2025-05-01", type: "fixed" },
-                { name: "Vesak Day", date: "2025-05-12", type: "fixed" },
-                { name: "Hari Raya Puasa", date: "2025-03-31", type: "fixed" },
-                { name: "National Day", date: "2025-08-09", type: "fixed" },
-                { name: "Hari Raya Haji", date: "2025-06-07", type: "fixed" },
-                { name: "Deepavali", date: "2025-10-20", type: "fixed" },
-                { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
-            ]
-        };
+    <div class="form-section">
+        <h3>Absences</h3>
+        <div class="form-group">
+            <div style="display: flex; align-items: center; flex: 1;">
+                <label for="publicHolidays" style="margin-right: 10px;">Public Holidays:</label>
+                <span id="holidaysList" class="holiday-list" style="margin-left: 0; margin-right: 10px;"></span>
+            </div>
+            <input type="number" id="publicHolidays" value="0" min="0" readonly style="background: #f5f5f5;">
+        </div>
+        <div class="form-group">
+            <label for="annualLeave">Annual Leave:</label>
+            <input type="number" id="annualLeave" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="sickness">Sickness:</label>
+            <input type="number" id="sickness" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label for="otherAbsence">Other absences (e.g., rail strike):</label>
+            <input type="number" id="otherAbsence" value="0" min="0">
+        </div>
+    </div>
 
-        // Generate period options
-        function generatePeriodOptions() {
-            const options = [];
-            const today = new Date();
-            const currentDay = today.getDate();
-            
-            // Calculate the current period starting point
-            let currentPeriodStart;
-            if (currentDay >= 14) {
-                currentPeriodStart = new Date(today.getFullYear(), today.getMonth(), 14);
-            } else {
-                currentPeriodStart = new Date(today.getFullYear(), today.getMonth() - 1, 14);
-            }
-            
-            // Generate current period and 6 previous periods
-            for (let i = 0; i < 7; i++) {
-                const periodStart = new Date(currentPeriodStart);
-                periodStart.setMonth(periodStart.getMonth() - i);
-                
-                const periodEnd = new Date(periodStart);
-                periodEnd.setMonth(periodEnd.getMonth() + 1);
-                periodEnd.setDate(13);
-                
-                const label = i === 0 ? 'Current Period' : `${i} period${i > 1 ? 's' : ''} ago`;
-                const dateRange = `${formatDateShort(periodStart)} - ${formatDateShort(periodEnd)}`;
-                
-                options.push({
-                    value: i,
-                    label: label,
-                    dateRange: dateRange,
-                    periodStart: periodStart,
-                    periodEnd: periodEnd
-                });
-            }
-            
-            return options;
+    <div id="result" class="result show">
+        <h3>Adjusted Target for Office Attendance</h3>
+        <div class="result-details">
+            <div class="result-row">
+                <span>Total absence:</span>
+                <span id="totalAbsence">-</span>
+            </div>
+            <div class="result-row">
+                <span>Absence percentage:</span>
+                <span id="absencePercent">-</span>
+            </div>
+            <div class="result-row">
+                <span>Minimum days adjusted:</span>
+                <span id="adjustedMin">-</span>
+            </div>
+            <div class="result-row">
+                <span>Minus business travel:</span>
+                <span id="minusTravel">-</span>
+            </div>
+        </div>
+        <div class="final-answer" id="finalAnswer">0 days</div>
+    </div>
+</div>
+
+<script>
+    // Public holidays database for different locations
+    const publicHolidays = {
+        AbuDhabi: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "Eid al-Fitr", date: "2025-03-30", type: "fixed" },
+            { name: "Eid al-Fitr", date: "2025-03-31", type: "fixed" },
+            { name: "Eid al-Fitr", date: "2025-04-01", type: "fixed" },
+            { name: "Arafat Day", date: "2025-06-06", type: "fixed" },
+            { name: "Eid al-Adha", date: "2025-06-07", type: "fixed" },
+            { name: "Eid al-Adha", date: "2025-06-08", type: "fixed" },
+            { name: "Eid al-Adha", date: "2025-06-09", type: "fixed" },
+            { name: "Islamic New Year", date: "2025-06-26", type: "fixed" },
+            { name: "Prophet Muhammad's Birthday", date: "2025-09-05", type: "fixed" },
+            { name: "Commemoration Day", date: "2025-12-01", type: "fixed" },
+            { name: "UAE National Day", date: "2025-12-02", type: "fixed" },
+            { name: "UAE National Day", date: "2025-12-03", type: "fixed" }
+        ],
+        Dublin: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "St. Patrick's Day", date: "2025-03-17", type: "fixed" },
+            { name: "Easter Monday", date: "2025-04-21", type: "easter" },
+            { name: "May Bank Holiday", date: "2025-05-05", type: "fixed" },
+            { name: "June Bank Holiday", date: "2025-06-02", type: "fixed" },
+            { name: "August Bank Holiday", date: "2025-08-04", type: "fixed" },
+            { name: "October Bank Holiday", date: "2025-10-27", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" },
+            { name: "St. Stephen's Day", date: "2025-12-26", type: "fixed" }
+        ],
+        London: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "Good Friday", date: "2025-04-18", type: "easter" },
+            { name: "Easter Monday", date: "2025-04-21", type: "easter" },
+            { name: "Early May Bank Holiday", date: "2025-05-05", type: "fixed" },
+            { name: "Spring Bank Holiday", date: "2025-05-26", type: "fixed" },
+            { name: "Summer Bank Holiday", date: "2025-08-25", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" },
+            { name: "Boxing Day", date: "2025-12-26", type: "fixed" }
+        ],
+        Mumbai: [
+            { name: "Republic Day", date: "2025-01-26", type: "fixed" },
+            { name: "Maha Shivratri", date: "2025-02-26", type: "fixed" },
+            { name: "Holi", date: "2025-03-14", type: "fixed" },
+            { name: "Ram Navami", date: "2025-04-06", type: "fixed" },
+            { name: "Good Friday", date: "2025-04-18", type: "easter" },
+            { name: "Buddha Purnima", date: "2025-05-12", type: "fixed" },
+            { name: "Eid al-Fitr", date: "2025-03-31", type: "fixed" },
+            { name: "Eid al-Adha", date: "2025-06-07", type: "fixed" },
+            { name: "Independence Day", date: "2025-08-15", type: "fixed" },
+            { name: "Ganesh Chaturthi", date: "2025-08-27", type: "fixed" },
+            { name: "Gandhi Jayanti", date: "2025-10-02", type: "fixed" },
+            { name: "Dussehra", date: "2025-10-02", type: "fixed" },
+            { name: "Diwali", date: "2025-10-20", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
+        ],
+        NewYork: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "Martin Luther King Jr. Day", date: "2025-01-20", type: "fixed" },
+            { name: "Presidents' Day", date: "2025-02-17", type: "fixed" },
+            { name: "Memorial Day", date: "2025-05-26", type: "fixed" },
+            { name: "Juneteenth", date: "2025-06-19", type: "fixed" },
+            { name: "Independence Day", date: "2025-07-04", type: "fixed" },
+            { name: "Labor Day", date: "2025-09-01", type: "fixed" },
+            { name: "Columbus Day", date: "2025-10-13", type: "fixed" },
+            { name: "Veterans Day", date: "2025-11-11", type: "fixed" },
+            { name: "Thanksgiving", date: "2025-11-27", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
+        ],
+        SaoPaulo: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "Carnival Monday", date: "2025-03-03", type: "fixed" },
+            { name: "Carnival Tuesday", date: "2025-03-04", type: "fixed" },
+            { name: "Good Friday", date: "2025-04-18", type: "easter" },
+            { name: "Tiradentes", date: "2025-04-21", type: "fixed" },
+            { name: "Labour Day", date: "2025-05-01", type: "fixed" },
+            { name: "Corpus Christi", date: "2025-06-19", type: "fixed" },
+            { name: "Independence Day", date: "2025-09-07", type: "fixed" },
+            { name: "Our Lady of Aparecida", date: "2025-10-12", type: "fixed" },
+            { name: "All Souls' Day", date: "2025-11-02", type: "fixed" },
+            { name: "Proclamation of the Republic", date: "2025-11-15", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
+        ],
+        Singapore: [
+            { name: "New Year's Day", date: "2025-01-01", type: "fixed" },
+            { name: "Chinese New Year", date: "2025-01-29", type: "fixed" },
+            { name: "Chinese New Year", date: "2025-01-30", type: "fixed" },
+            { name: "Good Friday", date: "2025-04-18", type: "easter" },
+            { name: "Labour Day", date: "2025-05-01", type: "fixed" },
+            { name: "Vesak Day", date: "2025-05-12", type: "fixed" },
+            { name: "Hari Raya Puasa", date: "2025-03-31", type: "fixed" },
+            { name: "National Day", date: "2025-08-09", type: "fixed" },
+            { name: "Hari Raya Haji", date: "2025-06-07", type: "fixed" },
+            { name: "Deepavali", date: "2025-10-20", type: "fixed" },
+            { name: "Christmas Day", date: "2025-12-25", type: "fixed" }
+        ]
+    };
+
+    // Generate period options
+    function generatePeriodOptions() {
+        const options = [];
+        const today = new Date();
+        const currentDay = today.getDate();
+
+        // Calculate the current period starting point
+        let currentPeriodStart;
+        if (currentDay >= 14) {
+            currentPeriodStart = new Date(today.getFullYear(), today.getMonth(), 14);
+        } else {
+            currentPeriodStart = new Date(today.getFullYear(), today.getMonth() - 1, 14);
         }
 
-        function formatDateShort(date) {
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('en-GB', options);
-        }
+        // Generate 3 future periods
+        for (let i = 3; i >= 1; i--) {
+            const periodStart = new Date(currentPeriodStart);
+            periodStart.setMonth(periodStart.getMonth() + i);
 
-        function formatDate(date) {
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            return date.toLocaleDateString('en-GB', options);
-        }
+            const periodEnd = new Date(periodStart);
+            periodEnd.setMonth(periodEnd.getMonth() + 1);
+            periodEnd.setDate(13);
 
-        function populatePeriodDropdown() {
-            const periodSelect = document.getElementById('periodSelect');
-            const options = generatePeriodOptions();
-            
-            periodSelect.innerHTML = '';
-            
-            options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option.value;
-                opt.textContent = `${option.label} (${option.dateRange})`;
-                periodSelect.appendChild(opt);
+            const label = `${i} period${i > 1 ? 's' : ''} ahead`;
+            const dateRange = `${formatDateShort(periodStart)} - ${formatDateShort(periodEnd)}`;
+
+            options.push({
+                value: -i, // Negative values for future periods
+                label: label,
+                dateRange: dateRange,
+                periodStart: periodStart,
+                periodEnd: periodEnd
             });
         }
 
-        function getSelectedPeriod() {
-            const periodSelect = document.getElementById('periodSelect');
-            const selectedIndex = parseInt(periodSelect.value) || 0;
-            const options = generatePeriodOptions();
-            return options[selectedIndex];
-        }
+        // Add current period
+        const periodStart = new Date(currentPeriodStart);
+        const periodEnd = new Date(periodStart);
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+        periodEnd.setDate(13);
 
-        function updatePeriodDates() {
-            const selectedPeriod = getSelectedPeriod();
-            const periodDatesDiv = document.getElementById('periodDates');
-            periodDatesDiv.textContent = `${formatDate(selectedPeriod.periodStart)} to ${formatDate(selectedPeriod.periodEnd)}`;
-        }
-        
-        function calculateWorkingDays(startDate, endDate) {
-            let workingDays = 0;
-            const currentDate = new Date(startDate);
-            
-            while (currentDate <= endDate) {
-                const dayOfWeek = currentDate.getDay();
-                // Monday = 1, Tuesday = 2, ..., Friday = 5 (exclude Saturday = 6, Sunday = 0)
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-                    workingDays++;
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            
-            return workingDays;
-        }
-        
-        function calculatePublicHolidays(location, startDate, endDate) {
-            const holidays = publicHolidays[location] || [];
-            let holidayCount = 0;
-            const holidayNames = [];
-            
-            holidays.forEach(holiday => {
-                const holidayDate = new Date(holiday.date);
-                if (holidayDate >= startDate && holidayDate <= endDate) {
-                    // Check if it's a weekday
-                    const dayOfWeek = holidayDate.getDay();
-                    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-                        holidayCount++;
-                        holidayNames.push(holiday.name);
-                    }
-                }
-            });
-            
-            return { count: holidayCount, names: holidayNames };
-        }
-        
-        function updatePeriodInfo() {
-            const selectedPeriod = getSelectedPeriod();
-            const workingDays = calculateWorkingDays(selectedPeriod.periodStart, selectedPeriod.periodEnd);
-            const locationSelect = document.getElementById('officeLocation');
-            const location = locationSelect ? locationSelect.value : 'Dublin';
-            const holidays = calculatePublicHolidays(location, selectedPeriod.periodStart, selectedPeriod.periodEnd);
-            
-            document.getElementById('workingDays').value = workingDays;
-            document.getElementById('publicHolidays').value = holidays.count;
-            
-            // Show holiday names
-            const holidaysList = holidays.names.length > 0 ? 
-                `(${holidays.names.join(', ')})` : '(None in this period)';
-            document.getElementById('holidaysList').textContent = holidaysList;
-            
-            updatePeriodDates();
-        }
-
-        function calculateAttendance() {
-            // Get input values
-            const workingDays = parseInt(document.getElementById('workingDays').value) || 0;
-            const minOffice = parseInt(document.getElementById('minOffice').value) || 0;
-            const businessTravel = parseInt(document.getElementById('businessTravel').value) || 0;
-            
-            const publicHolidays = parseInt(document.getElementById('publicHolidays').value) || 0;
-            const annualLeave = parseInt(document.getElementById('annualLeave').value) || 0;
-            const sickness = parseInt(document.getElementById('sickness').value) || 0;
-            const otherAbsence = parseInt(document.getElementById('otherAbsence').value) || 0;
-
-            // Calculate total absence
-            const totalAbsence = publicHolidays + annualLeave + sickness + otherAbsence;
-            
-            // Calculate absence percentage
-            const absencePercent = workingDays > 0 ? (totalAbsence / workingDays * 100) : 0;
-            
-            // Calculate adjusted minimum (minimum minus percentage of minimum)
-            const adjustedMin = Math.round(minOffice - (minOffice * absencePercent / 100));
-            
-            // Final calculation: adjusted minimum minus business travel
-            const finalTarget = Math.max(0, adjustedMin - businessTravel);
-
-            // Update result display
-            document.getElementById('totalAbsence').textContent = `${totalAbsence} days (${absencePercent.toFixed(1)}% of working days)`;
-            document.getElementById('absencePercent').textContent = `${absencePercent.toFixed(1)}%`;
-            document.getElementById('adjustedMin').textContent = `${minOffice} - ${absencePercent.toFixed(1)}% = ${adjustedMin} days`;
-            document.getElementById('minusTravel').textContent = `${adjustedMin} - ${businessTravel} = ${finalTarget} days`;
-            document.getElementById('finalAnswer').textContent = `${finalTarget} days`;
-
-            // Show result with animation
-            const resultDiv = document.getElementById('result');
-            resultDiv.classList.add('show');
-        }
-
-        // Initialize on page load
-        window.onload = function() {
-            populatePeriodDropdown();
-            updatePeriodInfo();
-            calculateAttendance();
-        };
-
-        // Add event listeners safely
-        document.addEventListener('DOMContentLoaded', function() {
-            const locationSelect = document.getElementById('officeLocation');
-            if (locationSelect) {
-                locationSelect.addEventListener('change', function() {
-                    updatePeriodInfo();
-                    calculateAttendance();
-                });
-            }
-
-            const periodSelect = document.getElementById('periodSelect');
-            if (periodSelect) {
-                periodSelect.addEventListener('change', function() {
-                    updatePeriodInfo();
-                    calculateAttendance();
-                });
-            }
-
-            const inputs = document.querySelectorAll('input[type="number"]:not([readonly])');
-            inputs.forEach(input => {
-                input.addEventListener('input', calculateAttendance);
-            });
+        options.push({
+            value: 0,
+            label: 'Current Period',
+            dateRange: `${formatDateShort(periodStart)} - ${formatDateShort(periodEnd)}`,
+            periodStart: periodStart,
+            periodEnd: periodEnd
         });
-    </script>
+
+        // Generate 3 past periods
+        for (let i = 1; i <= 3; i++) {
+            const periodStart = new Date(currentPeriodStart);
+            periodStart.setMonth(periodStart.getMonth() - i);
+
+            const periodEnd = new Date(periodStart);
+            periodEnd.setMonth(periodEnd.getMonth() + 1);
+            periodEnd.setDate(13);
+
+            const label = `${i} period${i > 1 ? 's' : ''} ago`;
+            const dateRange = `${formatDateShort(periodStart)} - ${formatDateShort(periodEnd)}`;
+
+            options.push({
+                value: i,
+                label: label,
+                dateRange: dateRange,
+                periodStart: periodStart,
+                periodEnd: periodEnd
+            });
+        }
+
+        return options;
+    }
+
+    function formatDateShort(date) {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options);
+    }
+
+    function formatDate(date) {
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options);
+    }
+
+    function populatePeriodDropdown() {
+        const periodSelect = document.getElementById('periodSelect');
+        const options = generatePeriodOptions();
+
+        periodSelect.innerHTML = '';
+
+        options.forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option.value;
+            opt.textContent = `${option.label} (${option.dateRange})`;
+            // Set the current period as selected
+            if (option.value === 0) {
+                opt.selected = true;
+            }
+            periodSelect.appendChild(opt);
+        });
+    }
+
+    function getSelectedPeriod() {
+        const periodSelect = document.getElementById('periodSelect');
+        const selectedValue = parseInt(periodSelect.value) || 0;
+        const options = generatePeriodOptions();
+        return options.find(option => option.value === selectedValue);
+    }
+
+    function updatePeriodDates() {
+        const selectedPeriod = getSelectedPeriod();
+        const periodDatesDiv = document.getElementById('periodDates');
+        periodDatesDiv.textContent = `${formatDate(selectedPeriod.periodStart)} to ${formatDate(selectedPeriod.periodEnd)}`;
+    }
+
+    function calculateWorkingDays(startDate, endDate) {
+        let workingDays = 0;
+        const currentDate = new Date(startDate);
+
+        while (currentDate <= endDate) {
+            const dayOfWeek = currentDate.getDay();
+            // Monday = 1, Tuesday = 2, ..., Friday = 5 (exclude Saturday = 6, Sunday = 0)
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                workingDays++;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return workingDays;
+    }
+
+    function calculatePublicHolidays(location, startDate, endDate) {
+        const holidays = publicHolidays[location] || [];
+        let holidayCount = 0;
+        const holidayNames = [];
+
+        holidays.forEach(holiday => {
+            const holidayDate = new Date(holiday.date);
+            if (holidayDate >= startDate && holidayDate <= endDate) {
+                // Check if it's a weekday
+                const dayOfWeek = holidayDate.getDay();
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                    holidayCount++;
+                    holidayNames.push(holiday.name);
+                }
+            }
+        });
+
+        return { count: holidayCount, names: holidayNames };
+    }
+
+    function updatePeriodInfo() {
+        const selectedPeriod = getSelectedPeriod();
+        const workingDays = calculateWorkingDays(selectedPeriod.periodStart, selectedPeriod.periodEnd);
+        const locationSelect = document.getElementById('officeLocation');
+        const location = locationSelect ? locationSelect.value : 'Dublin';
+        const holidays = calculatePublicHolidays(location, selectedPeriod.periodStart, selectedPeriod.periodEnd);
+
+        document.getElementById('workingDays').value = workingDays;
+        document.getElementById('publicHolidays').value = holidays.count;
+
+        // Show holiday names
+        const holidaysList = holidays.names.length > 0 ?
+            `(${holidays.names.join(', ')})` : '(None in this period)';
+        document.getElementById('holidaysList').textContent = holidaysList;
+
+        updatePeriodDates();
+    }
+
+    function calculateAttendance() {
+        // Get input values
+        const workingDays = parseInt(document.getElementById('workingDays').value) || 0;
+        const minOffice = parseInt(document.getElementById('minOffice').value) || 0;
+        const businessTravel = parseInt(document.getElementById('businessTravel').value) || 0;
+
+        const publicHolidays = parseInt(document.getElementById('publicHolidays').value) || 0;
+        const annualLeave = parseInt(document.getElementById('annualLeave').value) || 0;
+        const sickness = parseInt(document.getElementById('sickness').value) || 0;
+        const otherAbsence = parseInt(document.getElementById('otherAbsence').value) || 0;
+
+        // Calculate total absence
+        const totalAbsence = publicHolidays + annualLeave + sickness + otherAbsence;
+
+        // Calculate absence percentage
+        const absencePercent = workingDays > 0 ? (totalAbsence / workingDays * 100) : 0;
+
+        // Calculate adjusted minimum (minimum minus percentage of minimum)
+        const adjustedMin = Math.round(minOffice - (minOffice * absencePercent / 100));
+
+        // Final calculation: adjusted minimum minus business travel
+        const finalTarget = Math.max(0, adjustedMin - businessTravel);
+
+        // Update result display
+        document.getElementById('totalAbsence').textContent = `${totalAbsence} days (${absencePercent.toFixed(1)}% of working days)`;
+        document.getElementById('absencePercent').textContent = `${absencePercent.toFixed(1)}%`;
+        document.getElementById('adjustedMin').textContent = `${minOffice} - ${absencePercent.toFixed(1)}% = ${adjustedMin} days`;
+        document.getElementById('minusTravel').textContent = `${adjustedMin} - ${businessTravel} = ${finalTarget} days`;
+        document.getElementById('finalAnswer').textContent = `${finalTarget} days`;
+
+        // Show result with animation
+        const resultDiv = document.getElementById('result');
+        resultDiv.classList.add('show');
+    }
+
+    // Initialize on page load
+    window.onload = function() {
+        populatePeriodDropdown();
+        updatePeriodInfo();
+        calculateAttendance();
+    };
+
+    // Add event listeners safely
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationSelect = document.getElementById('officeLocation');
+        if (locationSelect) {
+            locationSelect.addEventListener('change', function() {
+                updatePeriodInfo();
+                calculateAttendance();
+            });
+        }
+
+        const periodSelect = document.getElementById('periodSelect');
+        if (periodSelect) {
+            periodSelect.addEventListener('change', function() {
+                updatePeriodInfo();
+                calculateAttendance();
+            });
+        }
+
+        const inputs = document.querySelectorAll('input[type="number"]:not([readonly])');
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateAttendance);
+        });
+    });
+</script>
 </body>
 </html>
